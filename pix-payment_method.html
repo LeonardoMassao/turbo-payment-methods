@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Pagamento via PIX</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #4b007d, #2f004d); /* Roxo escuro suave */
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .icon-wrapper {
+      margin-bottom: 10px;
+    }
+
+    .container {
+      background: #fff;
+      color: #333;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      max-width: 800px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    label::after {
+      content: ":";
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4a00e0;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #3700b3;
+    }
+
+    #qrcode {
+      margin: 30px auto;
+      width: fit-content;
+    }
+
+    .success {
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ícone centralizado acima da caixa -->
+  <div class="icon-wrapper">
+    <img width="50" height="50" src="https://img.icons8.com/color/50/pix.png" alt="pix"/>
+  </div>
+
+  <div class="container">
+    <div class="form-group">
+      <label for="nome">Nome do Recebedor</label>
+      <input type="text" id="nome" placeholder="Ex: MARIA SILVA" required>
+    </div>
+
+    <div class="form-group">
+      <label for="cidade">Cidade</label>
+      <input type="text" id="cidade" placeholder="Ex: SAO PAULO" required>
+    </div>
+
+    <div class="form-group">
+      <label for="valor">Valor (R$)</label>
+      <input type="number" id="valor" placeholder="Ex: 49.90" step="0.01" required>
+    </div>
+
+    <div class="form-group">
+      <label for="chave">Chave PIX</label>
+      <input type="text" id="chave" placeholder="Digite sua chave PIX" required>
+    </div>
+
+    <button onclick="gerarQRCodePix()">Gerar QR Code PIX</button>
+
+    <div id="qrcode"></div>
+    <div id="msg" class="success"></div>
+  </div>
+
+  <footer>
+    Redirecionado por Turbo AI Agent
+  </footer>
+
+  <script>
+    function gerarQRCodePix() {
+      const nome = document.getElementById('nome').value.trim().toUpperCase();
+      const cidade = document.getElementById('cidade').value.trim().toUpperCase();
+      const valor = document.getElementById('valor').value.trim();
+      const chave = document.getElementById('chave').value.trim();
+
+      if (!nome || !cidade || !valor || !chave || parseFloat(valor) <= 0) {
+        alert("Preencha todos os campos corretamente.");
+        return;
+      }
+
+      // Aplica o desconto de 5%
+      const valorComDesconto = (parseFloat(valor) * 0.95).toFixed(2);
+
+      const payload = [
+        "000201",
+        "010212",
+        "26",
+        `00${chave.length}${chave}`,
+        "52040000",
+        "5404",
+        `54${(parseFloat(valorComDesconto) * 100).toFixed(0)}`,
+        "5802BR",
+        `59${nome.length.toString().padStart(2, "0")}${nome}`,
+        `60${cidade.length.toString().padStart(2, "0")}${cidade}`,
+        "6304"
+      ].join("");
+
+      document.getElementById('qrcode').innerHTML = "";
+      new QRCode(document.getElementById('qrcode'), {
+        text: payload,
+        width: 220,
+        height: 220,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById('msg').textContent = `Escaneie o QR Code com seu app bancário! (Valor com 5% de desconto: R$ ${valorComDesconto})`;
+    }
+  </script>
+
+</body>
+</html>
